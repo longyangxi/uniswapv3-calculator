@@ -47,3 +47,7 @@ Uniswap V3 Fee Calculator created with React & Typescript, Visit: [uniswapv3.the
 ---
 
 Crafted with 🧡 by [@chunza2542](https://twitter.com/chunza2542)
+
+# 如何选定价格范围
+
+在src/repos/coingecko.ts中，34行，改动获取价格范围的参数QueryPeriodEnum.MAX即可
