@@ -5,14 +5,14 @@
  */
 
 export class Pool {
-    pa: number
-    pb: number
-    L: number
-    constructor(pa: number, pb: number, p: number, x: number, y: number) {
-        this.pa = Math.sqrt(pa);
-        this.pb = Math.sqrt(pb);
-        this.L = this.calL(p, x, y);
-        console.log("L: " + this.L);
+    Pl: number
+    Pu: number
+    liquidity: number
+    constructor(Pl: number, Pu: number, P: number, amt0: number, amt1: number) {
+        this.Pl = Math.sqrt(Pl);
+        this.Pu = Math.sqrt(Pu);
+        this.liquidity = this.calL(P, amt0, amt1);
+        console.log("liquidity: " + this.liquidity);
     }
     /**
    * calculate Liquidity
@@ -31,31 +31,31 @@ export class Pool {
       Case 3: upper < cprice
       liquidity = amt1 / (sqrt(upper) - sqrt(lower))
    */
-    calL(p: number, x: number, y: number) {
+    calL(p: number, amt0: number, amt1: number) {
         p = Math.sqrt(p);
         var l = 0;
-        if (p <= this.pa) {
-            l = this.calLx(this.pa, x, true);
-        } else if (p >= this.pb) {
-            l = this.calLy(this.pb, y, true);
+        if (p <= this.Pl) {
+            l = this.calLx(this.Pl, amt0, true);
+        } else if (p >= this.Pu) {
+            l = this.calLy(this.Pu, amt1, true);
         } else {
-            l = Math.min(this.calLx(p, x, true), this.calLy(p, y, true))
+            l = Math.min(this.calLx(p, amt0, true), this.calLy(p, amt1, true))
         }
         return l;
     }
     /**
     * calculate Lx
     */
-    calLx(p: number, x: number, isSqrt = false) {
+    calLx(p: number, amt0: number, isSqrt = false) {
         if (!isSqrt) p = Math.sqrt(p);
-        return x * (p * this.pb) / (this.pb - p);
+        return amt0 * (p * this.Pu) / (this.Pu - p);
     }
     /**
      * calculate Ly
      */
-    calLy(p: number, y: number, isSqrt = false) {
+    calLy(p: number, amt1: number, isSqrt = false) {
         if (!isSqrt) p = Math.sqrt(p);
-        return y / (p - this.pa);
+        return amt1 / (p - this.Pl);
     }
 
     /**
@@ -63,8 +63,8 @@ export class Pool {
      */
     calX(p: number) {
         p = Math.sqrt(p);
-        if (p >= this.pb) return 0;
-        return this.L * (this.pb - p) / (p * this.pb);
+        if (p >= this.Pu) return 0;
+        return this.liquidity * (this.Pu - p) / (p * this.Pu);
     }
 
     /**
@@ -72,26 +72,26 @@ export class Pool {
      */
     calY(p: number) {
         p = Math.sqrt(p);
-        if (p <= this.pa) return 0;
-        return this.L * (p - this.pa);
+        if (p <= this.Pl) return 0;
+        return this.liquidity * (p - this.Pl);
     }
 
     /**
      * 当前价格p，提供的tokenX的数量x，算出应提供多少数量的y
      */
-    calY2X(p: number, x: number) {
+    calY2X(p: number, amt0: number) {
         p = Math.sqrt(p);
-        if (p <= this.pa) return 0;
-        return this.calLx(p, x, true) * (p - this.pa);
+        if (p <= this.Pl) return 0;
+        return this.calLx(p, amt0, true) * (p - this.Pl);
     }
 
     /**
      * 当前价格p，提供的tokenY的数量y，算出应提供多少数量的x
      */
-    calX2Y(p: number, y: number) {
+    calX2Y(p: number, amt1: number) {
         p = Math.sqrt(p);
-        if (p >= this.pb) return 0;
-        return this.calLy(p, y, true) * (this.pb - p) / (p * this.pb);
+        if (p >= this.Pu) return 0;
+        return this.calLy(p, amt1, true) * (this.Pu - p) / (p * this.Pu);
     }
 }
 
@@ -107,8 +107,8 @@ function test() {
 
     var price = 4072.82
 
-    console.log("x: " + pool.calX(price), "y: " + pool.calY(price));
-    console.log("x: " + pool.calX(1972), "y: " + pool.calY(7801));
+    console.log("amt0: " + pool.calX(price), "amt1: " + pool.calY(price));
+    console.log("amt0: " + pool.calX(1972), "amt1: " + pool.calY(7801));
 
     console.log(pool.calX2Y(3866.07, 198000), pool.calY2X(3866.07, 53.06))
 }
