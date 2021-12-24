@@ -5,6 +5,7 @@ import Table from "../../common/Table";
 import { useAppContext } from "../../context/app/appContext";
 import { AppActionType } from "../../context/app/appReducer";
 import { getTokenAmountsFromDepositAmounts } from "../../utils/liquidityMath";
+import { Pool } from "../../utils/pool";
 
 const InputGroup = styled.div`
   display: flex;

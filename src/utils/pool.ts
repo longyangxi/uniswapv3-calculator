@@ -5,15 +5,43 @@
  */
 
 export class Pool {
+    /**
+     * Min price
+     */
     Pl: number
+    /**
+     * Max price
+     */
     Pu: number
-    liquidity: number
-    constructor(Pl: number, Pu: number, P: number, amt0: number, amt1: number) {
+    /***
+     * Liquidity of the pool
+     */
+    liquidity0: number
+
+    constructor(Pl: number, Pu: number) {
         this.Pl = Math.sqrt(Pl);
         this.Pu = Math.sqrt(Pu);
-        this.liquidity = this.calL(P, amt0, amt1);
-        console.log("liquidity: " + this.liquidity);
+        this.liquidity0 = 0;
     }
+    setInitData(P: number, amt0: number, amt1: number) {
+        this.liquidity0 = this.calL(P, amt0, amt1);
+    }
+    calAmount(P: number) {
+        // eslint-disable-next-line eqeqeq
+        if(this.liquidity0 == 0) {
+            // eslint-disable-next-line no-throw-literal
+            throw "Please setInitData firstly!"
+        }
+        P  = Math.sqrt(P);
+        var amount = {amt0: 0, amt1: 0}
+        if(P < this.Pu) {
+           amount.amt0 = this.liquidity0 * (this.Pu - P) / (P * this.Pu);
+        }
+        if(P > this.Pl) {
+          amount.amt1 = this.liquidity0 * (P - this.Pl);
+        }
+        return amount;
+      }
     /**
    * calculate Liquidity
    * The liquidity amount is calculated from the following numbers that describe a position:
@@ -59,24 +87,6 @@ export class Pool {
     }
 
     /**
-     * 当前价格p，提供的tokenY的数量y，算出应提供多少数量的x
-     */
-    calX(p: number) {
-        p = Math.sqrt(p);
-        if (p >= this.Pu) return 0;
-        return this.liquidity * (this.Pu - p) / (p * this.Pu);
-    }
-
-    /**
-     * 当前价格p，提供的tokenX的数量x，算出应提供多少数量的y
-     */
-    calY(p: number) {
-        p = Math.sqrt(p);
-        if (p <= this.Pl) return 0;
-        return this.liquidity * (p - this.Pl);
-    }
-
-    /**
      * 当前价格p，提供的tokenX的数量x，算出应提供多少数量的y
      */
     calY2X(p: number, amt0: number) {
@@ -99,7 +109,8 @@ export class Pool {
 
 
 function test() {
-    var pool = new Pool(1972.4, 7800.6, 3858.14, 53.24, 197300)
+    var pool = new Pool(1972.4, 7800.6)
+    pool.setInitData(3858.14, 53.24, 197300)
 
     var price = 3866.07
     var x = 53.06
@@ -107,9 +118,9 @@ function test() {
 
     var price = 4072.82
 
-    console.log("amt0: " + pool.calX(price), "amt1: " + pool.calY(price));
-    console.log("amt0: " + pool.calX(1972), "amt1: " + pool.calY(7801));
-
+    console.log(pool.calAmount(price));
+    console.log(pool.calAmount(1972));
+    console.log(pool.calAmount(7801));
     console.log(pool.calX2Y(3866.07, 198000), pool.calY2X(3866.07, 53.06))
 }
 
