@@ -18,90 +18,122 @@ export class Pool {
      */
     liquidity0: number
 
+    totalUSD0: number
+
     constructor(Pl: number, Pu: number) {
-        this.Pl = Math.sqrt(Pl);
-        this.Pu = Math.sqrt(Pu);
+        this.Pl = Pl;
+        this.Pu = Pu;
         this.liquidity0 = 0;
+        this.totalUSD0 = 0;
     }
-    setInitData(P: number, amt0: number, amt1: number) {
-        this.liquidity0 = this.calL(P, amt0, amt1);
+    ifSameRange(pl: number, pu: number) {
+        return this.Pl === pl && this.Pu === pu;
     }
-    calAmount(P: number) {
+    setInitData(P: number, amount0: number, amount1: number) {
+        this.liquidity0 = this.calL(P, amount0, amount1);
+    }
+    calAmounts(P: number) {
         // eslint-disable-next-line eqeqeq
-        if(this.liquidity0 == 0) {
+        if (this.liquidity0 == 0) {
             // eslint-disable-next-line no-throw-literal
             throw "Please setInitData firstly!"
         }
-        P  = Math.sqrt(P);
-        var amount = {amt0: 0, amt1: 0}
-        if(P < this.Pu) {
-           amount.amt0 = this.liquidity0 * (this.Pu - P) / (P * this.Pu);
+        P = Math.sqrt(P);
+        var pl = Math.sqrt(this.Pl)
+        var pu = Math.sqrt(this.Pu)
+        var amount = { amount0: 0, amount1: 0 }
+        if (P < pu) {
+            if (P < pl) P = pl;
+            amount.amount0 = this.liquidity0 * (pu - P) / (P * pu);
         }
-        if(P > this.Pl) {
-          amount.amt1 = this.liquidity0 * (P - this.Pl);
+        if (P > pl) {
+            if (P > pu) P = pu;
+            amount.amount1 = this.liquidity0 * (P - pl);
         }
         return amount;
-      }
+    }
+    calAmountsWithTotalUSD(P: number, totalUSD: number, priceUSD0: number, priceUSD1: number) {
+        var x2y: number = this.calX2Y(P, 1);
+        var y2x: number = this.calY2X(P, 1);
+        var amount: any = { amount0: 0, amount1: 0 };
+        if (x2y === -1) {
+            amount.amount0 = totalUSD / priceUSD0;
+        } else if (y2x === -1) {
+            amount.amount1 = totalUSD / priceUSD1;
+        } else {
+            amount.amount0 = totalUSD / (priceUSD0 + y2x * priceUSD1);
+            amount.amount1 = totalUSD / (priceUSD1 + x2y * priceUSD0);
+        }
+        this.totalUSD0 = totalUSD;
+        return amount;
+    }
     /**
    * calculate Liquidity
    * The liquidity amount is calculated from the following numbers that describe a position:
-   * amount of token 0 (amt0), amount of token 1 (amt1), price (as x token 1's per token 0) at the upper limit of the position (upper),
+   * amount of token 0 (amount0), amount of token 1 (amount1), price (as x token 1's per token 0) at the upper limit of the position (upper),
    * price at the lower limit of the position (lower) and the current swap price (cprice). Then liquidity for a position is calculated as follows:
   
       Case 1: cprice <= lower
-      liquidity = amt0 * (sqrt(upper) * sqrt(lower)) / (sqrt(upper) - sqrt(lower))
+      liquidity = amount0 * (sqrt(upper) * sqrt(lower)) / (sqrt(upper) - sqrt(lower))
   
       Case 2: lower < cprice <= upper
       liquidity is the min of the following two calculations:
-      amt0 * (sqrt(upper) * sqrt(cprice)) / (sqrt(upper) - sqrt(cprice))
-      amt1 / (sqrt(cprice) - sqrt(lower))
+      amount0 * (sqrt(upper) * sqrt(cprice)) / (sqrt(upper) - sqrt(cprice))
+      amount1 / (sqrt(cprice) - sqrt(lower))
   
       Case 3: upper < cprice
-      liquidity = amt1 / (sqrt(upper) - sqrt(lower))
+      liquidity = amount1 / (sqrt(upper) - sqrt(lower))
    */
-    calL(p: number, amt0: number, amt1: number) {
+    calL(p: number, amount0: number, amount1: number) {
         p = Math.sqrt(p);
+        var pl = Math.sqrt(this.Pl)
+        var pu = Math.sqrt(this.Pu)
         var l = 0;
-        if (p <= this.Pl) {
-            l = this.calLx(this.Pl, amt0, true);
-        } else if (p >= this.Pu) {
-            l = this.calLy(this.Pu, amt1, true);
+        if (p <= pl) {
+            l = this.calLx(pl, amount0, true);
+        } else if (p >= pu) {
+            l = this.calLy(pu, amount1, true);
         } else {
-            l = Math.min(this.calLx(p, amt0, true), this.calLy(p, amt1, true))
+            l = Math.min(this.calLx(p, amount0, true), this.calLy(p, amount1, true))
         }
         return l;
     }
     /**
     * calculate Lx
     */
-    calLx(p: number, amt0: number, isSqrt = false) {
+    calLx(p: number, amount0: number, isSqrt = false) {
         if (!isSqrt) p = Math.sqrt(p);
-        return amt0 * (p * this.Pu) / (this.Pu - p);
+        return amount0 * (p * Math.sqrt(this.Pu)) / (Math.sqrt(this.Pu) - p);
     }
     /**
      * calculate Ly
      */
-    calLy(p: number, amt1: number, isSqrt = false) {
+    calLy(p: number, amount1: number, isSqrt = false) {
         if (!isSqrt) p = Math.sqrt(p);
-        return amt1 / (p - this.Pl);
+        return amount1 / (p - Math.sqrt(this.Pl));
+    }
+    /**
+     * 当前价格p，提供的tokenY的数量y，算出应提供多少数量的x
+     */
+    calX2Y(p: number, amount1: number) {
+        p = Math.sqrt(p);
+        var pl = Math.sqrt(this.Pl)
+        var pu = Math.sqrt(this.Pu)
+        if (p >= pu) return 0;
+        if (p <= pl) return -1;
+        return this.calLy(p, amount1, true) * (pu - p) / (p * pu);
     }
 
     /**
      * 当前价格p，提供的tokenX的数量x，算出应提供多少数量的y
      */
-    calY2X(p: number, amt0: number) {
+    calY2X(p: number, amount0: number) {
         p = Math.sqrt(p);
-        if (p <= this.Pl) return 0;
-        return this.calLx(p, amt0, true) * (p - this.Pl);
-    }
-
-    /**
-     * 当前价格p，提供的tokenY的数量y，算出应提供多少数量的x
-     */
-    calX2Y(p: number, amt1: number) {
-        p = Math.sqrt(p);
-        if (p >= this.Pu) return 0;
-        return this.calLy(p, amt1, true) * (this.Pu - p) / (p * this.Pu);
+        var pl = Math.sqrt(this.Pl)
+        var pu = Math.sqrt(this.Pu)
+        if (p >= pu) return -1;
+        if (p <= pl) return 0;
+        return this.calLx(p, amount0, true) * (p - pl);
     }
 }
 
@@ -118,9 +150,9 @@ function test() {
 
     var price = 4072.82
 
-    console.log(pool.calAmount(price));
-    console.log(pool.calAmount(1972));
-    console.log(pool.calAmount(7801));
+    console.log(pool.calAmounts(price));
+    console.log(pool.calAmounts(1972));
+    console.log(pool.calAmounts(7801));
     console.log(pool.calX2Y(3866.07, 198000), pool.calY2X(3866.07, 53.06))
 }
 

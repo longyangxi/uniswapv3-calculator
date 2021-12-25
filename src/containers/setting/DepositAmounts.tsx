@@ -49,6 +49,8 @@ const Token = styled.div`
   }
 `;
 
+let pool: Pool;
+
 const DepositAmounts = () => {
   const { state, dispatch } = useAppContext();
 
@@ -59,15 +61,28 @@ const DepositAmounts = () => {
   const priceUSDY = state.token0PriceChart?.currentPriceUSD || 1;
   const targetAmounts = state.depositAmountValue;
 
-  const { amount0, amount1 } = getTokenAmountsFromDepositAmounts(
-    P,
-    Pl,
-    Pu,
-    priceUSDX,
-    priceUSDY,
-    targetAmounts
-  );
-
+  // const { amount0, amount1 } = getTokenAmountsFromDepositAmounts(
+  //   P,
+  //   Pl,
+  //   Pu,
+  //   priceUSDX,
+  //   priceUSDY,
+  //   targetAmounts
+  // );
+  let amounts: any;
+  if(pool != null) {
+    console.log(pool.ifSameRange(Pl, Pu))
+  }
+  if(pool == null || pool.liquidity0 === 0 || pool.totalUSD0 !== targetAmounts || !pool.ifSameRange(Pl, Pu)) {
+    pool = new Pool(Pl, Pu);
+    amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
+    pool.setInitData(P, amounts.amount0, amounts.amount1);
+  } else {
+    amounts = pool.calAmounts(P);
+  }
+  const {amount0, amount1} = amounts;
+  console.log(priceUSDX, priceUSDY)
+  
   return (
     <div>
       <Heading>Deposit Amounts</Heading>
