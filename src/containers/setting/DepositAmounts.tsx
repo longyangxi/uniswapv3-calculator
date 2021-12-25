@@ -57,8 +57,11 @@ const DepositAmounts = () => {
   const P = state.priceAssumptionValue;
   const Pl = state.priceRangeValue[0];
   const Pu = state.priceRangeValue[1];
-  const priceUSDX = state.token1PriceChart?.currentPriceUSD || 1;
-  const priceUSDY = state.token0PriceChart?.currentPriceUSD || 1;
+  //todo
+  const priceUSDX = P;//state.token1PriceChart?.currentPriceUSD || 1;
+  //todo
+  const priceUSDY = 1;//state.token0PriceChart?.currentPriceUSD || 1;
+
   const targetAmounts = state.depositAmountValue;
 
   // const { amount0, amount1 } = getTokenAmountsFromDepositAmounts(
@@ -68,7 +71,8 @@ const DepositAmounts = () => {
   //   priceUSDX,
   //   priceUSDY,
   //   targetAmounts
-  // );
+  // );  
+
   let amounts: any;
   if(pool != null) {
     console.log(pool.ifSameRange(Pl, Pu))
@@ -81,7 +85,6 @@ const DepositAmounts = () => {
     amounts = pool.calAmounts(P);
   }
   const {amount0, amount1} = amounts;
-  console.log(priceUSDX, priceUSDY)
   
   return (
     <div>
