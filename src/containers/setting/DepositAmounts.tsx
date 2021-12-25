@@ -23,6 +23,17 @@ const InputGroup = styled.div`
     transform: translateY(-1.5px);
   }
 `;
+const Input = styled.input`
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: white;
+
+  &:focus {
+    outline: none;
+  }
+`;
 const DepositInput = styled.input`
   display: block;
   width: 100%;
@@ -57,6 +68,7 @@ const DepositAmounts = () => {
   const P = state.priceAssumptionValue;
   const Pl = state.priceRangeValue[0];
   const Pu = state.priceRangeValue[1];
+
   //todo
   const priceUSDX = P;//state.token1PriceChart?.currentPriceUSD || 1;
   //todo
@@ -74,9 +86,7 @@ const DepositAmounts = () => {
   // );  
 
   let amounts: any;
-  if(pool != null) {
-    console.log(pool.ifSameRange(Pl, Pu))
-  }
+
   if(pool == null || pool.liquidity0 === 0 || pool.totalUSD0 !== targetAmounts || !pool.ifSameRange(Pl, Pu)) {
     pool = new Pool(Pl, Pu);
     amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
@@ -85,6 +95,8 @@ const DepositAmounts = () => {
     amounts = pool.calAmounts(P);
   }
   const {amount0, amount1} = amounts;
+  state.amount0 = amount0.toFixed(5)
+  state.amount1 = amount1.toFixed(5)
   
   return (
     <div>
@@ -112,7 +124,20 @@ const DepositAmounts = () => {
           <img alt={state.token0?.name} src={state.token0?.logoURI} />{" "}
           <span>{state.token0?.symbol}</span>
         </Token>
-        <div>{amount1.toFixed(5)}</div>
+        {/* <div>{amount1.toFixed(5)}</div> */}
+        <Input
+          value={state.amount1}
+          type="number"
+          placeholder="0.0"
+          onChange={(e) => {
+            let value = Number(e.target.value);
+            //todo
+            // dispatch({
+            //   type: AppActionType.UPDATE_PRICE_RANGE,
+            //   payload: [state.priceRangeValue[0], value],
+            // });
+          }}
+        />
         <div>${(amount1 * priceUSDY).toFixed(2)}</div>
       </Table>
       <Table>
@@ -120,7 +145,20 @@ const DepositAmounts = () => {
           <img alt={state.token1?.name} src={state.token1?.logoURI} />{" "}
           <span>{state.token1?.symbol}</span>
         </Token>
-        <div>{amount0.toFixed(5)}</div>
+        {/* <div>{amount0.toFixed(5)}</div> */}
+        <Input
+          value={state.amount0}
+          type="number"
+          placeholder="0.0"
+          onChange={(e) => {
+            let value = Number(e.target.value);
+            //todo
+            // dispatch({
+            //   type: AppActionType.UPDATE_PRICE_RANGE,
+            //   payload: [state.priceRangeValue[0], value],
+            // });
+          }}
+        />
         <div>${(amount0 * priceUSDX).toFixed(2)}</div>
       </Table>
     </div>
