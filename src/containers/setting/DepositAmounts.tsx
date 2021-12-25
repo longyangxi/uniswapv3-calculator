@@ -94,9 +94,12 @@ const DepositAmounts = () => {
   } else {
     amounts = pool.calAmounts(P);
   }
+
+  //todo, 这里阻止了amount0和amount1变化，在发送事件时计算targetAmounts再发出去？
   const {amount0, amount1} = amounts;
-  state.amount0 = amount0.toFixed(5)
-  state.amount1 = amount1.toFixed(5)
+  // state.amount0 = amount0.toFixed(5)
+  // state.amount1 = amount1.toFixed(5)
+  state.amounts = [amount0.toFixed(5), amount1.toFixed(5)]
   
   return (
     <div>
@@ -110,11 +113,16 @@ const DepositAmounts = () => {
           onChange={(e) => {
             let value = Number(e.target.value);
             if (value < 0) value = 0;
-
+            var amounts = pool.calAmountsWithTotalUSD(P, value, priceUSDX, priceUSDY)
+            pool.setInitData(P, amounts.amount0, amounts.amount1);
+            dispatch({
+              type: AppActionType.UPDATE_AMOUNTS,
+              payload: [amounts.amount0, amounts.amount1],
+            });
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload: value,
-            });
+              payload:  value
+            })
           }}
         />
       </InputGroup>
@@ -126,19 +134,24 @@ const DepositAmounts = () => {
         </Token>
         {/* <div>{amount1.toFixed(5)}</div> */}
         <Input
-          value={state.amount1}
+          value={state.amounts[1]}
           type="number"
           placeholder="0.0"
           onChange={(e) => {
             let value = Number(e.target.value);
-            //todo
+            let amount0 = pool.getAmount0ByAmount1(P, value);
+            let totalUsd = amount0 * priceUSDX + value * priceUSDY 
             // dispatch({
-            //   type: AppActionType.UPDATE_PRICE_RANGE,
-            //   payload: [state.priceRangeValue[0], value],
+            //   type: AppActionType.UPDATE_AMOUNTS,
+            //   payload: [amount0, value],
             // });
+            dispatch({
+              type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
+              payload:  totalUsd
+            })
           }}
         />
-        <div>${(amount1 * priceUSDY).toFixed(2)}</div>
+        <div>${(state.amounts[1] * priceUSDY).toFixed(2)}</div>
       </Table>
       <Table>
         <Token>
@@ -147,19 +160,24 @@ const DepositAmounts = () => {
         </Token>
         {/* <div>{amount0.toFixed(5)}</div> */}
         <Input
-          value={state.amount0}
+          value={state.amounts[0]}
           type="number"
           placeholder="0.0"
           onChange={(e) => {
             let value = Number(e.target.value);
-            //todo
+            let amount1 = pool.getAmount1ByAmount0(P, value);
+            let totalUsd = value * priceUSDX + amount1 * priceUSDY 
             // dispatch({
-            //   type: AppActionType.UPDATE_PRICE_RANGE,
-            //   payload: [state.priceRangeValue[0], value],
+            //   type: AppActionType.UPDATE_AMOUNTS,
+            //   payload: [value, amount1],
             // });
+            dispatch({
+              type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
+              payload:  totalUsd
+            })
           }}
         />
-        <div>${(amount0 * priceUSDX).toFixed(2)}</div>
+        <div>${(state.amounts[0] * priceUSDX).toFixed(2)}</div>
       </Table>
     </div>
   );

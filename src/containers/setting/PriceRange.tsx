@@ -86,7 +86,7 @@ const PriceRange = () => {
           <InputGroup>
             <span>Min Price</span>
             <Input
-              value={state.priceRangeValue[0].toFixed(5)}
+              value={state.priceRangeValue[0]}
               type="number"
               placeholder="0.0"
               onChange={(e) => {
@@ -105,7 +105,7 @@ const PriceRange = () => {
           <InputGroup>
             <span>Max Price</span>
             <Input
-              value={state.priceRangeValue[1].toFixed(5)}
+              value={state.priceRangeValue[1]}
               type="number"
               placeholder="0.0"
               onChange={(e) => {

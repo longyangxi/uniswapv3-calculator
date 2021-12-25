@@ -31,7 +31,7 @@ export interface PriceChart {
 }
 export const getPriceChart = async (
   contractAddress: string,
-  queryPeriod: QueryPeriodEnum = QueryPeriodEnum.ONE_MONTH
+  queryPeriod: QueryPeriodEnum = QueryPeriodEnum.MAX
 ): Promise<PriceChart> => {
   const token = getToken(contractAddress);
 

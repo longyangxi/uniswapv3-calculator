@@ -10,6 +10,7 @@ export enum AppActionType {
   UPDATE_PRICE_RANGE = "UPDATE_PRICE_RANGE",
   UPDATE_DEPOSIT_AMOUNT = "UPDATE_DEPOSIT_AMOUNT",
   UPDATE_PRICE_ASSUMPTION_VALUE = "UPDATE_PRICE_ASSUMPTION_VALUE",
+  UPDATE_AMOUNTS = "UPDATE_AMOUNTS",
 }
 export type AppAction =
   | {
@@ -34,7 +35,8 @@ export type AppAction =
   | { type: AppActionType.UPDATE_OUT_OF_RANGE_PERCENTAGE; payload: number }
   | { type: AppActionType.UPDATE_PRICE_ASSUMPTION_VALUE; payload: number }
   | { type: AppActionType.UPDATE_PRICE_RANGE; payload: number[] }
-  | { type: AppActionType.UPDATE_DEPOSIT_AMOUNT; payload: number };
+  | { type: AppActionType.UPDATE_DEPOSIT_AMOUNT; payload: number }
+  | { type: AppActionType.UPDATE_AMOUNTS; payload: number[] };
 
 export const appReducer = (
   state: AppContextState,
@@ -52,6 +54,9 @@ export const appReducer = (
     }
     case AppActionType.UPDATE_OUT_OF_RANGE_PERCENTAGE: {
       return { ...state, outOfRangePercentageValue: action.payload };
+    }
+    case AppActionType.UPDATE_AMOUNTS: {
+      return { ...state, amounts: action.payload};
     }
     case AppActionType.RESET_TOKEN_LIST: {
       return { ...state, tokenList: action.payload.tokenList };

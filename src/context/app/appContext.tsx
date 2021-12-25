@@ -16,8 +16,7 @@ export interface AppContextState {
   volume24H: number;
 
   depositAmountValue: number;
-  amount0: number;
-  amount1: number;
+  amounts: number[];
   priceRangeValue: number[];
   priceAssumptionValue: number;
   outOfRangePercentageValue: number;
@@ -35,8 +34,7 @@ const initialState: AppContextState = {
   volume24H: 0,
 
   depositAmountValue: 1000,
-  amount0: 0,
-  amount1: 0,
+  amounts: [0, 0],
   priceRangeValue: [0, 0],
   priceAssumptionValue: 0,
   outOfRangePercentageValue: 0,

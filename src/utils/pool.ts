@@ -1,5 +1,3 @@
-
-
 /**
  * http://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf
  */
@@ -53,8 +51,8 @@ export class Pool {
         return amount;
     }
     calAmountsWithTotalUSD(P: number, totalUSD: number, priceUSD0: number, priceUSD1: number) {
-        var x2y: number = this.calX2Y(P, 1);
-        var y2x: number = this.calY2X(P, 1);
+        var x2y: number = this.getAmount0ByAmount1(P, 1);
+        var y2x: number = this.getAmount1ByAmount0(P, 1);
         var amount: any = { amount0: 0, amount1: 0 };
         if (x2y === -1) {
             amount.amount0 = totalUSD / priceUSD0;
@@ -115,7 +113,7 @@ export class Pool {
     /**
      * 当前价格p，提供的tokenY的数量y，算出应提供多少数量的x
      */
-    calX2Y(p: number, amount1: number) {
+    getAmount0ByAmount1(p: number, amount1: number) {
         p = Math.sqrt(p);
         var pl = Math.sqrt(this.Pl)
         var pu = Math.sqrt(this.Pu)
@@ -127,7 +125,7 @@ export class Pool {
     /**
      * 当前价格p，提供的tokenX的数量x，算出应提供多少数量的y
      */
-    calY2X(p: number, amount0: number) {
+    getAmount1ByAmount0(p: number, amount0: number) {
         p = Math.sqrt(p);
         var pl = Math.sqrt(this.Pl)
         var pu = Math.sqrt(this.Pu)
@@ -153,6 +151,6 @@ function test() {
     console.log(pool.calAmounts(price));
     console.log(pool.calAmounts(1972));
     console.log(pool.calAmounts(7801));
-    console.log(pool.calX2Y(3866.07, 198000), pool.calY2X(3866.07, 53.06))
+    console.log(pool.getAmount0ByAmount1(3866.07, 198000), pool.getAmount1ByAmount0(3866.07, 53.06))
 }
 
