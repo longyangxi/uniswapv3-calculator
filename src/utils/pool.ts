@@ -15,6 +15,7 @@ export class Pool {
      * Liquidity of the pool
      */
     liquidity0: number
+    P0: number
 
     totalUSD0: number
 
@@ -23,11 +24,13 @@ export class Pool {
         this.Pu = Pu;
         this.liquidity0 = 0;
         this.totalUSD0 = 0;
+        this.P0 = 0;
     }
     ifSameRange(pl: number, pu: number) {
         return this.Pl === pl && this.Pu === pu;
     }
     setInitData(P: number, amount0: number, amount1: number) {
+        this.P0 = P;
         this.liquidity0 = this.calL(P, amount0, amount1);
     }
     calAmounts(P: number) {

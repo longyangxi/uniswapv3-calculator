@@ -85,21 +85,20 @@ const DepositAmounts = () => {
   //   targetAmounts
   // );  
 
-  let amounts: any;
-
-  if(pool == null || pool.liquidity0 === 0 || pool.totalUSD0 !== targetAmounts || !pool.ifSameRange(Pl, Pu)) {
-    pool = new Pool(Pl, Pu);
-    amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
-    pool.setInitData(P, amounts.amount0, amounts.amount1);
-  } else {
-    amounts = pool.calAmounts(P);
+  if(P > 0 && Pl > 0 && Pu > 0)  {
+    if(pool == null || !pool.ifSameRange(Pl, Pu)) {
+      pool = new Pool(Pl, Pu);
+      }
+      if(pool.totalUSD0 !== targetAmounts) {
+        var amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
+        pool.setInitData(P, amounts.amount0, amounts.amount1);
+        state.amounts = [amounts.amount0, amounts.amount1]
+      }
+      if(P !== pool.P0) {
+        amounts = pool.calAmounts(P)
+        state.amounts = [amounts.amount0, amounts.amount1]
+      }
   }
-
-  //todo, 这里阻止了amount0和amount1变化，在发送事件时计算targetAmounts再发出去？
-  const {amount0, amount1} = amounts;
-  // state.amount0 = amount0.toFixed(5)
-  // state.amount1 = amount1.toFixed(5)
-  state.amounts = [amount0.toFixed(5), amount1.toFixed(5)]
   
   return (
     <div>
@@ -113,12 +112,15 @@ const DepositAmounts = () => {
           onChange={(e) => {
             let value = Number(e.target.value);
             if (value < 0) value = 0;
-            var amounts = pool.calAmountsWithTotalUSD(P, value, priceUSDX, priceUSDY)
-            pool.setInitData(P, amounts.amount0, amounts.amount1);
-            dispatch({
-              type: AppActionType.UPDATE_AMOUNTS,
-              payload: [amounts.amount0, amounts.amount1],
-            });
+
+            // pool = new Pool(Pl, Pu);
+            // var amounts = pool.calAmountsWithTotalUSD(P, value, priceUSDX, priceUSDY)
+            // pool.setInitData(P, amounts.amount0, amounts.amount1);
+            // dispatch({
+            //   type: AppActionType.UPDATE_AMOUNTS,
+            //   payload: [amounts.amount0, amounts.amount1],
+            // });
+
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
               payload:  value
@@ -141,14 +143,18 @@ const DepositAmounts = () => {
             let value = Number(e.target.value);
             let amount0 = pool.getAmount0ByAmount1(P, value);
             let totalUsd = amount0 * priceUSDX + value * priceUSDY 
-            // dispatch({
-            //   type: AppActionType.UPDATE_AMOUNTS,
-            //   payload: [amount0, value],
-            // });
+
+            // pool.setInitData(P, amount0, value);
+            dispatch({
+              type: AppActionType.UPDATE_AMOUNTS,
+              payload: [amount0, value],
+            });
+
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
               payload:  totalUsd
             })
+            
           }}
         />
         <div>${(state.amounts[1] * priceUSDY).toFixed(2)}</div>
@@ -167,10 +173,13 @@ const DepositAmounts = () => {
             let value = Number(e.target.value);
             let amount1 = pool.getAmount1ByAmount0(P, value);
             let totalUsd = value * priceUSDX + amount1 * priceUSDY 
-            // dispatch({
-            //   type: AppActionType.UPDATE_AMOUNTS,
-            //   payload: [value, amount1],
-            // });
+
+            // pool.setInitData(P, value, amount1);
+            dispatch({
+              type: AppActionType.UPDATE_AMOUNTS,
+              payload: [value, amount1],
+            });
+
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
               payload:  totalUsd
