@@ -85,23 +85,22 @@ const DepositAmounts = () => {
   //   targetAmounts
   // );  
 
-  if(P > 0 && Pl > 0 && Pu > 0)  {
-    if(pool == null || !pool.ifSameRange(Pl, Pu)) {
+  if (P > 0 && Pl > 0 && Pu > 0) {
+    if (pool == null || !pool.ifSameRange(Pl, Pu)) {
       pool = new Pool(Pl, Pu);
-      }
-      if(pool.totalUSD0 !== targetAmounts) {
-        var amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
-        pool.setInitData(P, amounts.amount0, amounts.amount1);
-      }
-      if(P !== pool.P0) {
-        amounts = pool.calAmounts(P)
-      }
-      if(amounts) {
-        state.amounts = [amounts.amount0.toFixed(5), amounts.amount1.toFixed(5)]
-        // state.amounts = [amounts.amount0, amounts.amount1]
-      }
+    }
+    if (pool.totalUSD0 !== targetAmounts) {
+      var amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
+      pool.setInitData(P, amounts.amount0, amounts.amount1);
+    }
+    if (P !== pool.P0) {
+      amounts = pool.calAmounts(P)
+    }
+    if (amounts) {
+      state.amounts = [amounts.amount0.toFixed(5), amounts.amount1.toFixed(5)]
+    }
   }
-  
+
   return (
     <div>
       <Heading>Deposit Amounts</Heading>
@@ -116,7 +115,7 @@ const DepositAmounts = () => {
             if (value < 0) value = 0;
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload:  value
+              payload: value
             })
           }}
         />
@@ -135,21 +134,20 @@ const DepositAmounts = () => {
           onChange={(e) => {
             let value = Number(e.target.value);
             let amount0 = pool.getAmount0ByAmount1(P, value);
-            let totalUsd = amount0 * priceUSDX + value * priceUSDY 
+            let totalUsd = amount0 * priceUSDX + value * priceUSDY
             pool.setInitData(P, amount0, value);
             //prevent from recalculating
             pool.totalUSD0 = Number(totalUsd.toFixed(5));
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
               payload: [Number(amount0.toFixed(5)), value],
-              // payload: [amount0, value],
             });
 
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload:  Number(totalUsd.toFixed(5))
+              payload: Number(totalUsd.toFixed(5))
             })
-            
+
           }}
         />
         <div>${(state.amounts[1] * priceUSDY).toFixed(2)}</div>
@@ -167,19 +165,18 @@ const DepositAmounts = () => {
           onChange={(e) => {
             let value = Number(e.target.value);
             let amount1 = pool.getAmount1ByAmount0(P, value);
-            let totalUsd = value * priceUSDX + amount1 * priceUSDY 
+            let totalUsd = value * priceUSDX + amount1 * priceUSDY
             pool.setInitData(P, value, amount1);
             //prevent from recalculating
             pool.totalUSD0 = Number(totalUsd.toFixed(5));
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
               payload: [value, Number(amount1.toFixed(5))],
-              // payload: [value, amount1],
             });
 
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload:  pool.totalUSD0
+              payload: pool.totalUSD0
             })
           }}
         />
