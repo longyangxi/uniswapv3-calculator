@@ -92,11 +92,13 @@ const DepositAmounts = () => {
       if(pool.totalUSD0 !== targetAmounts) {
         var amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
         pool.setInitData(P, amounts.amount0, amounts.amount1);
-        state.amounts = [amounts.amount0, amounts.amount1]
       }
       if(P !== pool.P0) {
         amounts = pool.calAmounts(P)
-        state.amounts = [amounts.amount0, amounts.amount1]
+      }
+      if(amounts) {
+        state.amounts = [amounts.amount0.toFixed(5), amounts.amount1.toFixed(5)]
+        // state.amounts = [amounts.amount0, amounts.amount1]
       }
   }
   
@@ -136,15 +138,16 @@ const DepositAmounts = () => {
             let totalUsd = amount0 * priceUSDX + value * priceUSDY 
             pool.setInitData(P, amount0, value);
             //prevent from recalculating
-            pool.totalUSD0 = totalUsd;
+            pool.totalUSD0 = Number(totalUsd.toFixed(5));
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
-              payload: [amount0, value],
+              payload: [Number(amount0.toFixed(5)), value],
+              // payload: [amount0, value],
             });
 
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload:  totalUsd
+              payload:  Number(totalUsd.toFixed(5))
             })
             
           }}
@@ -167,15 +170,16 @@ const DepositAmounts = () => {
             let totalUsd = value * priceUSDX + amount1 * priceUSDY 
             pool.setInitData(P, value, amount1);
             //prevent from recalculating
-            pool.totalUSD0 = totalUsd;
+            pool.totalUSD0 = Number(totalUsd.toFixed(5));
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
-              payload: [value, amount1],
+              payload: [value, Number(amount1.toFixed(5))],
+              // payload: [value, amount1],
             });
 
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload:  totalUsd
+              payload:  pool.totalUSD0
             })
           }}
         />
