@@ -5,6 +5,7 @@ import Table from "../common/Table";
 import { useAppContext } from "../context/app/appContext";
 import { Tick } from "../repos/uniswap";
 import bn from "bignumber.js";
+import { Pool } from "../utils/pool";
 import {
   calculateFee,
   getLiquidityForAmounts,
@@ -63,15 +64,20 @@ const EstimatedFees = () => {
   const priceUSDX = state.token1PriceChart?.currentPriceUSD || 1;
   const priceUSDY = state.token0PriceChart?.currentPriceUSD || 1;
   const targetAmounts = state.depositAmountValue;
+  
+  var [amount0, amount1] = state.amounts
 
-  const { amount0, amount1 } = getTokenAmountsFromDepositAmounts(
-    P,
-    Pl,
-    Pu,
-    priceUSDX,
-    priceUSDY,
-    targetAmounts
-  );
+  if(amount0 ===  0 && amount1 === 0) {
+    var { amount0, amount1 } = getTokenAmountsFromDepositAmounts(
+      P,
+      Pl,
+      Pu,
+      priceUSDX,
+      priceUSDY,
+      targetAmounts
+    );
+  }
+
 
   const sqrtRatioX96 = getSqrtPriceX96(
     P,

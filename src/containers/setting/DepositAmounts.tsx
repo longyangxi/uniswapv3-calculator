@@ -133,11 +133,13 @@ const DepositAmounts = () => {
           placeholder="0.0"
           onChange={(e) => {
             let value = Number(e.target.value);
+
             let amount0 = pool.getAmount0ByAmount1(P, value);
             let totalUsd = amount0 * priceUSDX + value * priceUSDY
             pool.setInitData(P, amount0, value);
             //prevent from recalculating
             pool.totalUSD0 = Number(totalUsd.toFixed(5));
+
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
               payload: [Number(amount0.toFixed(5)), value],
@@ -164,11 +166,13 @@ const DepositAmounts = () => {
           placeholder="0.0"
           onChange={(e) => {
             let value = Number(e.target.value);
+
             let amount1 = pool.getAmount1ByAmount0(P, value);
             let totalUsd = value * priceUSDX + amount1 * priceUSDY
             pool.setInitData(P, value, amount1);
             //prevent from recalculating
             pool.totalUSD0 = Number(totalUsd.toFixed(5));
+
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
               payload: [value, Number(amount1.toFixed(5))],
