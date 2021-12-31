@@ -25,6 +25,8 @@ import {
   ModalActionType,
   modalContextReducer,
 } from "../../context/modal/modalReducer";
+import { getPositionInfo } from "../../utils/position";
+
 
 const ModalStyle = {
   overlay: {
@@ -151,6 +153,33 @@ const Logo = styled.h1`
     margin-right: 7px;
   }
 `;
+const IdInput = styled.input`
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: white;
+  font-weight: 600;
+  font-size: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+
+  &:focus {
+    outline: none;
+  }
+`;
+const SplitLine = styled.div`
+  display: block;
+  width: 100%;
+  border:none;
+  border-top:2px solid rgba(255, 255, 255, 0.2);
+  margin-top: 10px;
+  margin-bottom: 10px;
+`
+
 const FEE_TIER_STYLES = {
   DISABLE: {
     cursor: "not-allowed",
@@ -161,6 +190,11 @@ const FEE_TIER_STYLES = {
     background: "rgba(38, 109, 221, 0.25)",
   },
 };
+
+//let position = getPositionInfo(164195)
+  // let pool = new Pool(position.priceLower, data.priceUpper)
+  // pool.liquidity0 = data.liquidity / 10**12
+  // pool.calAmounts()
 
 const SelectPairModal = () => {
   const appContext = useAppContext();
@@ -188,6 +222,8 @@ const SelectPairModal = () => {
   useEffect(() => {
     fetchPools();
   }, [selectedTokens]);
+
+  console.log(selectedTokens)
 
   const isFormDisabled =
     isSubmitLoading ||
@@ -332,6 +368,23 @@ const SelectPairModal = () => {
               <span>🦄</span> UniswapCalculator
             </Logo>
             <Container>
+              <Heading>Do you have a position ID?</Heading>
+              <SelectPairContainer>
+              <IdInput
+                value={1000}
+                type="number"
+                placeholder="0.00"
+                onChange={(e) => {
+                  // let value = Number(e.target.value);
+                  // if (value < 0) value = 0;
+                  // dispatch({
+                  //   type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
+                  //   payload: value
+                  // })
+                }}
+              />
+              </SelectPairContainer>
+              <SplitLine/>
               <Heading>Select Pair</Heading>
               <SelectPairContainer>
                 <TokenSelect
