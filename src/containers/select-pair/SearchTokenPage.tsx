@@ -144,7 +144,7 @@ const SearchTokenPage = ({ tokens, selectToken }: SearchTokenPageProps) => {
             return (
               <TokenItem
                 onClick={() => selectToken(token)}
-                id={`${token.symbol}_${token.name}_${token.id}`}
+                key={`${token.symbol}_${token.name}_${token.id}`}
               >
                 <img src={token.logoURI} alt={token.name} />
                 <div>

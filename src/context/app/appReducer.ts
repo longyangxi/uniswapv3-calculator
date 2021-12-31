@@ -11,6 +11,7 @@ export enum AppActionType {
   UPDATE_DEPOSIT_AMOUNT = "UPDATE_DEPOSIT_AMOUNT",
   UPDATE_PRICE_ASSUMPTION_VALUE = "UPDATE_PRICE_ASSUMPTION_VALUE",
   UPDATE_AMOUNTS = "UPDATE_AMOUNTS",
+  UPDATE_POSITION = "UPDATE_POSITION"
 }
 export type AppAction =
   | {
@@ -36,7 +37,8 @@ export type AppAction =
   | { type: AppActionType.UPDATE_PRICE_ASSUMPTION_VALUE; payload: number }
   | { type: AppActionType.UPDATE_PRICE_RANGE; payload: number[] }
   | { type: AppActionType.UPDATE_DEPOSIT_AMOUNT; payload: number }
-  | { type: AppActionType.UPDATE_AMOUNTS; payload: number[] };
+  | { type: AppActionType.UPDATE_AMOUNTS; payload: number[] }
+  | { type: AppActionType.UPDATE_POSITION; payload: number};
 
 export const appReducer = (
   state: AppContextState,
@@ -60,6 +62,9 @@ export const appReducer = (
     }
     case AppActionType.RESET_TOKEN_LIST: {
       return { ...state, tokenList: action.payload.tokenList };
+    }
+    case AppActionType.UPDATE_POSITION: {
+      return { ...state, positionID: action.payload}
     }
     case AppActionType.RESET_PAIR: {
       const {

@@ -6,7 +6,7 @@ import { Heading } from "../../common/atomic";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { PrimaryBlockButton } from "../../common/buttons";
+import { PrimaryBlockButton, PrimaryButton } from "../../common/buttons";
 import { useState } from "react";
 import {
   getPoolFromPair,
@@ -26,6 +26,8 @@ import {
   modalContextReducer,
 } from "../../context/modal/modalReducer";
 import { getPositionInfo } from "../../utils/position";
+import { Pool as PPool } from "../../utils/pool";
+import { getPriceFromTick } from "../../utils/liquidityMath";
 
 
 const ModalStyle = {
@@ -164,8 +166,6 @@ const IdInput = styled.input`
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 6px 8px;
-  display: flex;
-  align-items: center;
 
   &:focus {
     outline: none;
@@ -191,11 +191,6 @@ const FEE_TIER_STYLES = {
   },
 };
 
-//let position = getPositionInfo(164195)
-  // let pool = new Pool(position.priceLower, data.priceUpper)
-  // pool.liquidity0 = data.liquidity / 10**12
-  // pool.calAmounts()
-
 const SelectPairModal = () => {
   const appContext = useAppContext();
   const modalContext = useModalContext();
@@ -215,6 +210,8 @@ const SelectPairModal = () => {
 
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
 
+  const [curPosition, setCurPosition] = useState<any>(null)
+
   useEffect(() => {
     fetchTokens();
   }, []);
@@ -223,7 +220,22 @@ const SelectPairModal = () => {
     fetchPools();
   }, [selectedTokens]);
 
-  console.log(selectedTokens)
+  useEffect(() => {
+    updatePosition()
+  }, [curPosition, appContext.state.tokenList])
+
+  useEffect(() => {
+    updatePosition1()
+  }, [selectedTokens, pools])
+
+  const isCheckDisabled = isSubmitLoading || appContext.state.positionID <= 0;
+
+  const checkPosition = async() => {
+    setIsSubmitLoading(true)
+    let position = await getPositionInfo(appContext.state.positionID)
+    setCurPosition(position);
+    setIsSubmitLoading(false);
+  }  
 
   const isFormDisabled =
     isSubmitLoading ||
@@ -265,25 +277,56 @@ const SelectPairModal = () => {
     });
   };
 
+  const updatePosition = () => {
+    if(!curPosition || !appContext.state.tokenList.length) return;
+
+    const token0 = getTokenByAddress(curPosition.token0)
+    const token1 = getTokenByAddress(curPosition.token1)
+  
+    if(token0 == null) return;
+    if(token1 == null) return;
+
+    setSelectedTokens([token0, token1]);
+  }
+
+  const updatePosition1 = () => {
+    if(!curPosition || !pools.length) return;
+    const fee = curPosition.fee?.toString()
+    const tier = getFeeTier(fee);
+    tier && setSelectedPool(tier);
+
+    const decimals0 = selectedTokens[0]?.decimals || "18"
+    const decimals1 = selectedTokens[1]?.decimals || "18"
+
+    curPosition.priceLower = Number(getPriceFromTick(curPosition?.tickLower, decimals0, decimals1).toFixed(5))
+    curPosition.priceUpper = Number(getPriceFromTick(curPosition?.tickUpper, decimals0, decimals1).toFixed(5))
+
+    let pPool = new PPool(curPosition.priceLower, curPosition.priceUpper)
+    pPool.liquidity0 = curPosition.liquidity / 10**12
+
+    //todo, cp没有获到，看是否这部分逻辑移到deposit那个page
+    const cp = appContext.state.priceAssumptionValue;
+    const amounts = pPool.calAmounts(cp)
+    console.log(amounts, cp)
+  }
   const fetchPools = async () => {
     if (!selectedTokens[0] || !selectedTokens[1]) return;
     const pools = await getPoolFromPair(selectedTokens[0], selectedTokens[1]);
     setPools(pools);
-
     if (pools.length === 0) {
       setSelectedPool(null);
       return;
     }
 
-    let maxPool = pools[0];
-    let maxLiquidity = Number(pools[0].liquidity);
-    pools.forEach((pool) => {
-      if (Number(pool.liquidity) > maxLiquidity) {
-        maxPool = pool;
-        maxLiquidity = Number(pool.liquidity);
-      }
-    });
-    setSelectedPool(maxPool);
+      let maxPool = pools[0];
+      let maxLiquidity = Number(pools[0].liquidity);
+      pools.forEach((pool) => {
+        if (Number(pool.liquidity) > maxLiquidity) {
+          maxPool = pool;
+          maxLiquidity = Number(pool.liquidity);
+        }
+      });
+      setSelectedPool(maxPool);
   };
 
   const getFeeTier = (feeTier: string) => {
@@ -323,6 +366,16 @@ const SelectPairModal = () => {
       payload: { tokenList },
     });
   };
+
+  const getTokenByAddress = (addr: string) => {
+     const list = appContext.state.tokenList
+     for(var i = 0; i < list.length; i++) {
+       if(list[i].id.toLowerCase() === addr.toLowerCase()) {
+         return list[i]
+       }
+     }
+     return null;
+  }
 
   const selectToken = (token: V3Token) => {
     const _selectedTokens = JSON.parse(JSON.stringify(selectedTokens));
@@ -371,21 +424,41 @@ const SelectPairModal = () => {
               <Heading>Do you have a position ID?</Heading>
               <SelectPairContainer>
               <IdInput
-                value={1000}
+                value={appContext.state.positionID}
                 type="number"
-                placeholder="0.00"
+                placeholder="0"
                 onChange={(e) => {
-                  // let value = Number(e.target.value);
-                  // if (value < 0) value = 0;
-                  // dispatch({
-                  //   type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-                  //   payload: value
-                  // })
+                  let value = Number(e.target.value);
+                  if (value < 0) value = 0;
+                  appContext.dispatch({
+                    type: AppActionType.UPDATE_POSITION,
+                    payload: value
+                  })
                 }}
               />
+              <PrimaryButton onClick={checkPosition}
+                disabled={isCheckDisabled}
+                style={
+                  isCheckDisabled
+                    ? {
+                        background: "rgba(255, 255, 255, 0.1)",
+                        cursor: "not-allowed",
+                      }
+                    : {}
+                }
+              >
+                {isSubmitLoading && (
+                  <ReactLoading
+                    type="spin"
+                    color="rgba(34, 114, 229, 1)"
+                    height={18}
+                    width={18}
+                  />
+                )}
+                {!isSubmitLoading && <span>Check</span>}</PrimaryButton>
               </SelectPairContainer>
               <SplitLine/>
-              <Heading>Select Pair</Heading>
+              <Heading>Or Select Pair</Heading>
               <SelectPairContainer>
                 <TokenSelect
                   onClick={() => {
