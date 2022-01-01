@@ -295,13 +295,19 @@ const SelectPairModal = () => {
     const tier = getFeeTier(fee);
     tier && setSelectedPool(tier);
 
+
     const decimals0 = selectedTokens[0]?.decimals || "18"
     const decimals1 = selectedTokens[1]?.decimals || "18"
 
-    curPosition.priceLower = Number(getPriceFromTick(curPosition?.tickLower, decimals0, decimals1).toFixed(5))
-    curPosition.priceUpper = Number(getPriceFromTick(curPosition?.tickUpper, decimals0, decimals1).toFixed(5))
+    let priceLower = Number(getPriceFromTick(curPosition?.tickLower, decimals0, decimals1).toFixed(5))
+    let priceUpper = Number(getPriceFromTick(curPosition?.tickUpper, decimals0, decimals1).toFixed(5))
 
-    let pPool = new PPool(curPosition.priceLower, curPosition.priceUpper)
+    appContext.dispatch({
+      type: AppActionType.UPDATE_PRICE_RANGE,
+      payload: [priceLower, priceUpper],
+    });
+
+    let pPool = new PPool(priceLower, priceUpper)
     pPool.liquidity0 = curPosition.liquidity / 10**12
 
     //todo, cp没有获到，看是否这部分逻辑移到deposit那个page
@@ -458,7 +464,7 @@ const SelectPairModal = () => {
                 {!isSubmitLoading && <span>Check</span>}</PrimaryButton>
               </SelectPairContainer>
               <SplitLine/>
-              <Heading>Or Select Pair</Heading>
+              <Heading>Select Pair</Heading>
               <SelectPairContainer>
                 <TokenSelect
                   onClick={() => {

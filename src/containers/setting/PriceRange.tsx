@@ -72,10 +72,12 @@ const PriceRange = () => {
       type: AppActionType.UPDATE_PRICE_ASSUMPTION_VALUE,
       payload: currentPrice,
     });
-    dispatch({
-      type: AppActionType.UPDATE_PRICE_RANGE,
-      payload: [_min, _max],
-    });
+    if(state.priceRangeValue[0] * state.priceRangeValue[1] === 0) {
+      dispatch({
+        type: AppActionType.UPDATE_PRICE_RANGE,
+        payload: [_min, _max],
+      });
+    }
   }, [state.pool]);
 
   return (
