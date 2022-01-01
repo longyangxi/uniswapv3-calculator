@@ -21,6 +21,7 @@ export interface AppContextState {
   priceAssumptionValue: number;
   outOfRangePercentageValue: number;
   positionID: number;
+  liquidity: number;
 }
 const initialState: AppContextState = {
   tokenList: [],
@@ -39,7 +40,8 @@ const initialState: AppContextState = {
   priceRangeValue: [0, 0],
   priceAssumptionValue: 0,
   outOfRangePercentageValue: 0,
-  positionID: 0
+  positionID: 0,
+  liquidity: 0
 };
 
 interface AppContextProviderProps {

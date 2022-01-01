@@ -89,13 +89,27 @@ const DepositAmounts = () => {
     if (pool == null || !pool.ifSameRange(Pl, Pu)) {
       pool = new Pool(Pl, Pu);
     }
-    if (pool.totalUSD0 !== targetAmounts) {
+    
+    let needUpdateTotalUsd = false;
+    if(state.liquidity > 0 && pool.liquidity0 !== state.liquidity) {
+      pool.liquidity0 = state.liquidity;
+      //trigger pool.calAmounts func and update totalUsd
+      needUpdateTotalUsd = true;
+    } else if (pool.totalUSD0 !== targetAmounts) {
       var amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
       pool.setInitData(P, amounts.amount0, amounts.amount1);
     }
-    if (P !== pool.P0) {
+    if (P !== pool.P0 || needUpdateTotalUsd) {
       amounts = pool.calAmounts(P)
     }
+
+    if(needUpdateTotalUsd) {
+      var totalUsd = amounts.amount0 * priceUSDX + amounts.amount1 * priceUSDY
+      totalUsd = Number(totalUsd.toFixed(5))
+      pool.totalUSD0 = totalUsd;
+      state.depositAmountValue = totalUsd;
+    }
+
     if (amounts) {
       state.amounts = [amounts.amount0.toFixed(5), amounts.amount1.toFixed(5)]
     }

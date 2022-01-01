@@ -307,13 +307,10 @@ const SelectPairModal = () => {
       payload: [priceUpper, priceLower],
     });
 
-    let pPool = new PPool(priceLower, priceUpper)
-    pPool.liquidity0 = curPosition.liquidity / 10**12
-
-    //todo, cp没有获到，看是否这部分逻辑移到deposit那个page
-    const cp = appContext.state.priceAssumptionValue;
-    const amounts = pPool.calAmounts(cp)
-    console.log(amounts, cp)
+    appContext.dispatch({
+      type: AppActionType.UPDATE_LIQUIDITY,
+      payload: curPosition.liquidity / 10**12
+    })
   }
   const fetchPools = async () => {
     if (!selectedTokens[0] || !selectedTokens[1]) return;

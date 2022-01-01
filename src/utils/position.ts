@@ -46,6 +46,6 @@ export const getPositionInfo = async function(tokenId: number) {
     // data.priceLower = Number(getPriceFromTick(info.tickLower, decimals0, decimals1).toFixed(5))
     // data.priceUpper = Number(getPriceFromTick(info.tickUpper, decimals0, decimals1).toFixed(5))
 
-    console.log(data)
+    // console.log(data)
     return data;
 }
