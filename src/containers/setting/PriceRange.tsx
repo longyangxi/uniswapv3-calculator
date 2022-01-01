@@ -63,6 +63,8 @@ const PriceRange = () => {
   const max = _max + margin;
   const step = (max - min) / 10000000;
 
+  // console.log(_min, _max, min, max, state.priceRangeValue)
+
   useEffect(() => {
     const currentPrice = Number(state.pool?.token0Price || NaN);
 
@@ -72,6 +74,7 @@ const PriceRange = () => {
       type: AppActionType.UPDATE_PRICE_ASSUMPTION_VALUE,
       payload: currentPrice,
     });
+    //If not defined, use [_min, _max]
     if(state.priceRangeValue[0] * state.priceRangeValue[1] === 0) {
       dispatch({
         type: AppActionType.UPDATE_PRICE_RANGE,
