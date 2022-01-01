@@ -304,7 +304,7 @@ const SelectPairModal = () => {
 
     appContext.dispatch({
       type: AppActionType.UPDATE_PRICE_RANGE,
-      payload: [priceLower, priceUpper],
+      payload: [priceUpper, priceLower],
     });
 
     let pPool = new PPool(priceLower, priceUpper)
