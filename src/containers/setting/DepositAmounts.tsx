@@ -23,6 +23,10 @@ const InputGroup = styled.div`
     transform: translateY(-1.5px);
   }
 `;
+const DepositLabel = styled.div`
+  font-size: 1.3rem;
+  color: grey;
+`
 const Input = styled.input`
   display: block;
   width: 100%;
@@ -95,6 +99,7 @@ const DepositAmounts = () => {
       pool.liquidity0 = state.liquidity;
       //trigger pool.calAmounts func and update totalUsd
       needUpdateTotalUsd = true;
+      state.liquidity = 0;
     } else if (pool.totalUSD0 !== targetAmounts) {
       var amounts = pool.calAmountsWithTotalUSD(P, targetAmounts, priceUSDX, priceUSDY)
       pool.setInitData(P, amounts.amount0, amounts.amount1);
@@ -105,7 +110,7 @@ const DepositAmounts = () => {
 
     if(needUpdateTotalUsd) {
       var totalUsd = amounts.amount0 * priceUSDX + amounts.amount1 * priceUSDY
-      totalUsd = Number(totalUsd.toFixed(5))
+      totalUsd = Number(totalUsd.toFixed(2))
       pool.totalUSD0 = totalUsd;
       state.depositAmountValue = totalUsd;
     }
@@ -115,25 +120,28 @@ const DepositAmounts = () => {
     }
   }
 
+  let totalUsdNow = state.amounts[0] * priceUSDX + state.amounts[1] * priceUSDY
+
   return (
     <div>
       <Heading>Deposit Amounts</Heading>
       <InputGroup>
-        <span className="dollar">$</span>
-        <DepositInput
-          value={state.depositAmountValue}
-          type="number"
-          placeholder="0.00"
-          onChange={(e) => {
-            let value = Number(e.target.value);
-            if (value < 0) value = 0;
-            dispatch({
-              type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload: value
-            })
-          }}
-        />
-      </InputGroup>
+          <span className="dollar">$</span>
+          <DepositInput
+            value={state.depositAmountValue}
+            type="number"
+            placeholder="0.00"
+            onChange={(e) => {
+              let value = Number(e.target.value);
+              if (value < 0) value = 0;
+              dispatch({
+                type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
+                payload: value
+              })
+            }}
+          />
+          <DepositLabel>${totalUsdNow.toFixed(2)}</DepositLabel>
+        </InputGroup>
 
       <Table>
         <Token>
@@ -152,7 +160,7 @@ const DepositAmounts = () => {
             let totalUsd = amount0 * priceUSDX + value * priceUSDY
             pool.setInitData(P, amount0, value);
             //prevent from recalculating
-            pool.totalUSD0 = Number(totalUsd.toFixed(5));
+            pool.totalUSD0 = Number(totalUsd.toFixed(2));
 
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
@@ -161,7 +169,7 @@ const DepositAmounts = () => {
 
             dispatch({
               type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
-              payload: Number(totalUsd.toFixed(5))
+              payload: Number(totalUsd.toFixed(2))
             })
 
           }}
@@ -185,7 +193,7 @@ const DepositAmounts = () => {
             let totalUsd = value * priceUSDX + amount1 * priceUSDY
             pool.setInitData(P, value, amount1);
             //prevent from recalculating
-            pool.totalUSD0 = Number(totalUsd.toFixed(5));
+            pool.totalUSD0 = Number(totalUsd.toFixed(2));
 
             dispatch({
               type: AppActionType.UPDATE_AMOUNTS,
