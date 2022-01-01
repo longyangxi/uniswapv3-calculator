@@ -395,6 +395,7 @@ const SelectPairModal = () => {
   return (
     <>
       <Modal
+        ariaHideApp={false}
         style={ModalStyle}
         isOpen={modalContext.state.isSelectPairModalOpen}
         contentLabel="Example Modal"

@@ -97,6 +97,7 @@ const DonateModal = () => {
   return (
     <>
       <Modal
+        ariaHideApp={false}
         style={ModalStyle}
         isOpen={state.isDonateModalOpen}
         contentLabel="DONATE"
