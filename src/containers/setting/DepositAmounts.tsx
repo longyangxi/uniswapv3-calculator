@@ -113,6 +113,10 @@ const DepositAmounts = () => {
       totalUsd = Number(totalUsd.toFixed(2))
       pool.totalUSD0 = totalUsd;
       state.depositAmountValue = totalUsd;
+      dispatch({
+        type: AppActionType.UPDATE_DEPOSIT_AMOUNT,
+        payload: totalUsd
+      })
     }
 
     if (amounts) {
