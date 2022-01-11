@@ -1,6 +1,14 @@
 import bn from "bignumber.js";
 import { getFeeTierPercentage } from "./helper";
 import { encodePriceSqrt, expandDecimals } from "./math";
+import { TickMath } from "@uniswap/v3-sdk"
+import JSBI from 'jsbi'
+import {Token, Price} from '@uniswap/sdk-core'
+import { tickToPrice } from "@uniswap/v3-sdk"
+
+// used in liquidity amount math
+const Q96_ = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96))
+const Q192 = JSBI.exponentiate(Q96_, JSBI.BigInt(2))
 
 bn.config({ EXPONENTIAL_AT: 999999, DECIMAL_PLACES: 40 });
 
@@ -16,12 +24,7 @@ export const getTickFromPrice = (
 ): number => {
   const token0 = expandDecimals(price, Number(token0Decimal));
   const token1 = expandDecimals(1, Number(token1Decimal));
-  const sqrtPrice = mulDiv(
-    encodePriceSqrt(token1),
-    Q96,
-    encodePriceSqrt(token0)
-  ).div(new bn(2).pow(96));
-
+  const sqrtPrice = encodePriceSqrt(token1).div(encodePriceSqrt(token0))
   return Math.log(sqrtPrice.toNumber()) / Math.log(Math.sqrt(1.0001));
 };
 
@@ -30,14 +33,12 @@ export const getPriceFromTick = (
   token0Decimal: string,
   token1Decimal: string
 ): number => {
-  const sqrtPrice = new bn(Math.pow(Math.sqrt(1.0001), tick)).multipliedBy(
-    new bn(2).pow(96)
-  );
+  const sqrtPrice = new bn(Math.pow(Math.sqrt(1.0001), tick));//.multipliedBy(Q96);
   const token0 = expandDecimals(1, Number(token0Decimal));
   const token1 = expandDecimals(1, Number(token1Decimal));
-  const L2 = mulDiv(encodePriceSqrt(token0), encodePriceSqrt(token1), Q96);
-  const price = mulDiv(L2, Q96, sqrtPrice)
-    .div(new bn(2).pow(96))
+  const L2 = encodePriceSqrt(token0).multipliedBy(encodePriceSqrt(token1))
+  const price = L2.div(sqrtPrice)
+    .div(Q96.pow(2))
     .div(new bn(10).pow(token0Decimal))
     .pow(2);
 
@@ -97,9 +98,9 @@ export const getSqrtPriceX96 = (
   const token0 = expandDecimals(price, Number(token0Decimal));
   const token1 = expandDecimals(1, Number(token1Decimal));
   // return mulDiv(encodePriceSqrt(token1), Q96, encodePriceSqrt(token0)).div(
-  //   new bn(2).pow(96)
+  //   Q96
   // );
-  return token0.div(token1).sqrt().multipliedBy(new bn(2).pow(96));
+  return token0.div(token1).sqrt().multipliedBy(Q96);
 };
 
 export const getLiquidityForAmounts = (
@@ -150,3 +151,15 @@ export const calculateFee = (
 
   return feeTier * volume24H * liquidityPercentage;
 };
+
+console.log("fuck", getPriceFromTick(186700, "6", '18'))
+console.log("fuck", getPriceFromTick(200450, "6", '18'))
+
+console.log(getTickFromPrice(7800.4, "6", '18'))
+console.log(getTickFromPrice(1972.6, '6', '18'))
+
+var token0 = new Token(1, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 18, "ETH")
+var token1 = new Token(1, '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 6, "USDC")
+var p0 = tickToPrice(token0, token1, 186700)
+var p1 = tickToPrice(token0, token1, 200450)
+console.log(p0.toSignificant(5), p1.toSignificant(5))

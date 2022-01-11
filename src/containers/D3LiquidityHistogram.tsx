@@ -222,6 +222,11 @@ class D3LiquidityHistogram {
           .attr("text-anchor", "right")
           .attr("y", 20);
       } else {
+        console.log(x0, getPriceFromTick(
+          x0,
+          this.props.token0Decimal,
+          this.props.token1Decimal
+        ))
         focusTextToken0
           .html(
             `${this.token0Symbol}: ${getPriceFromTick(
